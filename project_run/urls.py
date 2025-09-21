@@ -19,6 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from app_run.views import company_details, RunViewSet, UsersViewSet
+from project_run import settings
 
 router = DefaultRouter()
 router.register('api/runs', RunViewSet)
@@ -31,3 +32,8 @@ urlpatterns = [
     path('', include(router.urls)),
 
 ]
+
+
+if settings.base.DEBUG:
+    import debug_toolbar
+    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]

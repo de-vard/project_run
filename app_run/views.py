@@ -19,8 +19,13 @@ def company_details(request):
 
 class RunViewSet(viewsets.ModelViewSet):
     """Возвращаем сущность забегов"""
-    queryset = Run.objects.all()
     serializer_class = RunSerializer
+
+    # для оптимизации запросов к БД, решаем проблему с n+1
+    queryset = Run.objects.all().select_related('athlete')
+
+    # queryset = Run.objects.all()
+
 
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):
     """Возвращение пользователей по параметру"""

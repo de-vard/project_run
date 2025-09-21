@@ -1,13 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-
 from .models import Run
-
-class RunSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Run
-        fields = '__all__'
 
 class UsersSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
@@ -18,3 +12,17 @@ class UsersSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         return "coach" if obj.is_staff else "athlete"
+
+class UserNestedSerializer(serializers.ModelSerializer):
+    """Вложеный сериализатор для  RunSerializer"""
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'last_name', 'first_name']
+
+class RunSerializer(serializers.ModelSerializer):
+    """Сериализатор для сущностей бега и вывода пользователей"""
+    athlete_data = UsersSerializer(source='athlete', read_only=True)
+
+    class Meta:
+        model = Run
+        fields = '__all__'

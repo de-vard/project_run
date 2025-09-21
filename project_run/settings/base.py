@@ -46,12 +46,21 @@ INSTALLED_APPS = [
 
     #drf
     'rest_framework',
+    # Django Debug Toolbar
+    'debug_toolbar',
 
     #local
     'app_run',
 ]
 
+# Django Debug Toolbar
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware', # Django Debug Toolbar
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
