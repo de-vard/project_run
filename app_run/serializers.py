@@ -21,7 +21,7 @@ class UserNestedSerializer(serializers.ModelSerializer):
 
 class RunSerializer(serializers.ModelSerializer):
     """Сериализатор для сущностей бега и вывода пользователей"""
-    athlete_data = UsersSerializer(source='athlete', read_only=True)
+    athlete_data = UserNestedSerializer(source='athlete', read_only=True)
 
     class Meta:
         model = Run
