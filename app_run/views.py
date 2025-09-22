@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
 from app_run.models import Run
@@ -30,6 +31,8 @@ class RunViewSet(viewsets.ModelViewSet):
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):
     """Возвращение пользователей по параметру"""
     serializer_class = UsersSerializer
+    filter_backends = [SearchFilter]  # Подключаем SearchFilter
+    search_fields = ['first_name', 'last_name'] #  Указываем поля по которым будет вестись поиск
 
     def _check_parameter(self):
         """Проверка параметров"""
