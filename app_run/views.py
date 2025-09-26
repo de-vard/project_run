@@ -33,7 +33,7 @@ class RunViewSet(viewsets.ModelViewSet):
 class StartFiAPIView(views.APIView):
     """Изменяем статус что забег продолжается """
 
-    def patch(self, request, run_id):
+    def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
         if obj.status != Run.Actions.INIT:
@@ -52,9 +52,10 @@ class StartFiAPIView(views.APIView):
         }
         return Response(data, status=status.HTTP_200_OK)
 
+
 class StopFiAPIView(views.APIView):
     """Изменяем статус что забег закончился """
-    def patch(self, request, run_id):
+    def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
         if obj.status != Run.Actions.PROGRESS:
