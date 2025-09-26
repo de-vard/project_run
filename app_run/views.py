@@ -36,7 +36,7 @@ class StartFiAPIView(views.APIView):
     def patch(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
-        if obj.status != obj.INIT:
+        if obj.status != Run.Actions.INIT:
             return Response(
                 {'error': f'Cannot start run from {obj.status} status'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -57,7 +57,7 @@ class StopFiAPIView(views.APIView):
     def patch(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
-        if obj.status != obj.INIT:
+        if obj.status != Run.Actions.PROGRESS:
             return Response(
                 {'error': f'Cannot start run from {obj.status} status'},
                 status=status.HTTP_400_BAD_REQUEST
