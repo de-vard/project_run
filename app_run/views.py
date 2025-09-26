@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from rest_framework import viewsets
+from rest_framework import viewsets, views, status
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+
 
 from app_run.models import Run
 from app_run.serializers import RunSerializer, UsersSerializer
@@ -26,6 +28,37 @@ class RunViewSet(viewsets.ModelViewSet):
     queryset = Run.objects.all().select_related('athlete')
 
     # queryset = Run.objects.all()
+
+
+class StartFiAPIView(views.APIView):
+    """Изменяем статус что забег продолжается """
+    def patch(self, request, run_id):
+        obj = get_object_or_404(Run, id=run_id)
+
+        obj.status = Run.Actions.PROGRESS
+        obj.save()
+
+        data = {
+            'id': obj.id,
+            'status': obj.status,
+            'message': 'Run started successfully'
+        }
+        return Response(data, status=status.HTTP_200_OK)
+
+class StopFiAPIView(views.APIView):
+    """Изменяем статус что забег закончился """
+    def patch(self, request, run_id):
+        obj = get_object_or_404(Run, id=run_id)
+
+        obj.status = Run.Actions.FINISHED
+        obj.save()
+
+        data = {
+            'id': obj.id,
+            'status': obj.status,
+            'message': 'Run started successfully'
+        }
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):
