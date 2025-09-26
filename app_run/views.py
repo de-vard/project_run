@@ -32,8 +32,15 @@ class RunViewSet(viewsets.ModelViewSet):
 
 class StartFiAPIView(views.APIView):
     """Изменяем статус что забег продолжается """
+
     def patch(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
+
+        if obj.status != obj.INIT:
+            return Response(
+                {'error': f'Cannot start run from {obj.status} status'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         obj.status = Run.Actions.PROGRESS
         obj.save()
@@ -49,6 +56,12 @@ class StopFiAPIView(views.APIView):
     """Изменяем статус что забег закончился """
     def patch(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
+
+        if obj.status != obj.INIT:
+            return Response(
+                {'error': f'Cannot start run from {obj.status} status'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         obj.status = Run.Actions.FINISHED
         obj.save()
