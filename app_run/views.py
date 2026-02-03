@@ -93,7 +93,7 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UsersSerializer
     filter_backends = [SearchFilter, OrderingFilter]  # Подключаем SearchFilter
     search_fields = ['first_name', 'last_name']  # Указываем поля по которым будет вестись поиск
-    ordering_fields = ['created_at']  # Поля по которым будет возможна сортировка
+    ordering_fields = ['date_joined']  # Поля по которым будет возможна сортировка
     pagination_class = RunPagination
 
     def _check_parameter(self):

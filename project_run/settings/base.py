@@ -13,9 +13,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 
 # Константы
-COMPANY_NAME = 'just lazy'
-SLOGAN = 'do you need it?'
-CONTACTS = '+7 365 227-21-22'
+COMPANY_NAME = 'RUN'
+SLOGAN = 'Run, Forest, run!'
+CONTACTS = '+79780034604'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
