@@ -36,9 +36,9 @@ class RunViewSet(viewsets.ModelViewSet):
     # для оптимизации запросов к БД, решаем проблему с n+1
     queryset = Run.objects.all().select_related('athlete')
     # Указываем какой класс будет использоваться для фильтра и для сортировки
-    # filter_backends = [DjangoFilterBackend, OrderingFilter]
-    # filterset_fields = ['status', ]  # Поля, по которым будет происходить фильтрация
-    # ordering_fields = ['created_at']  # Поля по которым будет возможна сортировка
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['status', ]  # Поля, по которым будет происходить фильтрация
+    ordering_fields = ['created_at']  # Поля по которым будет возможна сортировка
     pagination_class = RunPagination
 
 
