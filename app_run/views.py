@@ -5,33 +5,45 @@ from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.filters import OrderingFilter
 
 from app_run.models import Run
 from app_run.serializers import RunSerializer, UsersSerializer
 
 
+class RunPagination(PageNumberPagination):
+    """Класс пагинации"""
+    # page_size = 5
+    # max_page_size = 50
+    page_size_query_param = 'size'  # Разрешаем изменять количество объектов через query параметр size в url
+
+
 @api_view(['GET'])
 def company_details(request):
-        details = {
-            'company_name': settings.COMPANY_NAME,
-            'slogan': settings.SLOGAN,
-            'contacts': settings.CONTACTS
-        }
-        return Response(details)
+    details = {
+        'company_name': settings.COMPANY_NAME,
+        'slogan': settings.SLOGAN,
+        'contacts': settings.CONTACTS
+    }
+    return Response(details)
+
 
 class RunViewSet(viewsets.ModelViewSet):
     """Возвращаем сущность забегов"""
     serializer_class = RunSerializer
-
     # для оптимизации запросов к БД, решаем проблему с n+1
     queryset = Run.objects.all().select_related('athlete')
-
-    # queryset = Run.objects.all()
+    # Указываем какой класс будет использоваться для фильтра и для сортировки
+    # filter_backends = [DjangoFilterBackend, OrderingFilter]
+    # filterset_fields = ['status', ]  # Поля, по которым будет происходить фильтрация
+    # ordering_fields = ['created_at']  # Поля по которым будет возможна сортировка
+    pagination_class = RunPagination
 
 
 class StartFiAPIView(views.APIView):
-    """Изменяем статус что забег продолжается """
+    """Изменяем статус, что забег продолжается """
 
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
@@ -54,7 +66,8 @@ class StartFiAPIView(views.APIView):
 
 
 class StopFiAPIView(views.APIView):
-    """Изменяем статус что забег закончился """
+    """Изменяем статус, что забег закончился """
+
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
@@ -78,8 +91,9 @@ class StopFiAPIView(views.APIView):
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):
     """Возвращение пользователей по параметру"""
     serializer_class = UsersSerializer
-    filter_backends = [SearchFilter]  # Подключаем SearchFilter
-    search_fields = ['first_name', 'last_name'] #  Указываем поля по которым будет вестись поиск
+    filter_backends = [SearchFilter, OrderingFilter]  # Подключаем SearchFilter
+    search_fields = ['first_name', 'last_name']  # Указываем поля по которым будет вестись поиск
+    ordering_fields = ['created_at']  # Поля по которым будет возможна сортировка
 
     def _check_parameter(self):
         """Проверка параметров"""
@@ -89,15 +103,14 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
 
     @staticmethod
     def _is_coach(pr):
-        """ Так как идет речь только об теренеров и подопечных,
+        """ Так как идет речь только об тренеров и подопечных,
             можно сравнить только на одно значение, выбор пал на тренера,
-            если парамерт неравен coach значит он атлет
+            если параметр неравен coach значит он атлет
         """
         return pr == "coach"
 
-
     def get_queryset(self):
-        """Переопределяем квэрисетов"""
+        """Переопределяем квэрисет"""
         queryset = (User.objects.all().exclude(is_superuser=True))
         parameter = self._check_parameter()
         staff = self._is_coach(parameter)

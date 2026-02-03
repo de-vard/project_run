@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Run(models.Model):
     class Actions(models.TextChoices):
         """Выбор действия"""
@@ -11,7 +12,6 @@ class Run(models.Model):
         @classmethod
         def get_max_length(cls):
             return max(len(choice.value) for choice in cls)
-
 
     status = models.CharField(
         max_length=Actions.get_max_length(),

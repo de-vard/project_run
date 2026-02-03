@@ -17,10 +17,8 @@ COMPANY_NAME = 'just lazy'
 SLOGAN = 'do you need it?'
 CONTACTS = '+7 365 227-21-22'
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -33,7 +31,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,12 +41,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #drf
+    # drf
     'rest_framework',
     # Django Debug Toolbar
     'debug_toolbar',
-
-    #local
+    # для фильтров
+    'django_filters',
+    
+    # local
     'app_run',
 ]
 
@@ -58,9 +57,8 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware', # Django Debug Toolbar
+    'debug_toolbar.middleware.DebugToolbarMiddleware',  # Django Debug Toolbar
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -108,7 +106,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -120,7 +117,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -131,4 +127,3 @@ STATIC_ROOT = 'static'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
