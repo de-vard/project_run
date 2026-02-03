@@ -37,7 +37,7 @@ class RunViewSet(viewsets.ModelViewSet):
     queryset = Run.objects.all().select_related('athlete')
     # Указываем какой класс будет использоваться для фильтра и для сортировки
     filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_fields = ['status', ]  # Поля, по которым будет происходить фильтрация
+    filterset_fields = ['status', 'athlete']  # Поля, по которым будет происходить фильтрация
     ordering_fields = ['created_at']  # Поля по которым будет возможна сортировка
     pagination_class = RunPagination
 
