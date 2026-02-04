@@ -111,7 +111,7 @@ class AthleteInfoAPIView(views.APIView):
         }
 
         weight = request.data.get('weight')
-        if weight.isdigit():
+        if weight.isalpha():
             return Response({'error': 'Invalid weight'}, status=status.HTTP_400_BAD_REQUEST)
         if weight is not None and not (0 < int(weight) < 900):
             return Response({'error': 'Invalid weight'}, status=status.HTTP_400_BAD_REQUEST)
