@@ -94,20 +94,33 @@ class AthleteInfoAPIView(views.APIView):
     def get(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
         obj, _ = AthleteInfo.objects.get_or_create(user=user)
-        serializer = AthleteInfoSerializer(obj)
-        return Response(serializer.data)
+        data = {
+            'user_id': obj.user.id,
+            'goals': obj.goals,
+            'weight': obj.weight
+        }
+        return Response(data, status=status.HTTP_200_OK)
 
     def put(self, request, user_id, format=None):
         user = get_object_or_404(User, id=user_id)
+        data = {
+            'user': user,
+            'id': user.id,
+            'goals': request.data['goals'],
+            'weight': request.data['weight'],
+        }
+
+        weight = request.data.get('weight')
+        if weight is not None and not (0 < int(weight) < 900):
+            return Response({'error': 'Invalid weight'}, status=status.HTTP_400_BAD_REQUEST)
+
         obj, _ = AthleteInfo.objects.update_or_create(user=user)
-        serializer = AthleteInfoSerializer(obj, data=request.data)
-        weight = request.data
-        if 0 > weight or weight > 900:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        serializer = AthleteInfoSerializer(obj, data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data)
+
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):
