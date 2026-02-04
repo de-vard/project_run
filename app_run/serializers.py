@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Run
+from .models import Run, AthleteInfo
 
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -39,3 +39,14 @@ class RunSerializer(serializers.ModelSerializer):
     class Meta:
         model = Run
         fields = '__all__'
+
+
+class AthleteInfoSerializer(serializers.ModelSerializer):
+    """Для дополнительной информации от пользователя"""
+
+    class Meta:
+        model = AthleteInfo
+        fields = ['goals', 'weight', 'id']
+        read_only_fields = ['id', ]
+
+

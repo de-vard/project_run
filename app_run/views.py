@@ -9,8 +9,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import OrderingFilter
 
-from app_run.models import Run
-from app_run.serializers import RunSerializer, UsersSerializer
+from app_run.models import Run, AthleteInfo
+from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer
 
 
 class RunPagination(PageNumberPagination):
@@ -86,6 +86,28 @@ class StopFiAPIView(views.APIView):
             'message': 'Run started successfully'
         }
         return Response(data, status=status.HTTP_200_OK)
+
+
+class AthleteInfoAPIView(views.APIView):
+    """Для дополнительной информации от пользователя"""
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        obj, _ = AthleteInfo.objects.get_or_create(user=user)
+        serializer = AthleteInfoSerializer(obj)
+        return Response(serializer.data)
+
+    def put(self, request, user_id, format=None):
+        user = get_object_or_404(User, id=user_id)
+        obj, _ = AthleteInfo.objects.update_or_create(user=user)
+        serializer = AthleteInfoSerializer(obj, data=request.data)
+        weight = request.data
+        if 0 > weight or weight > 900:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):

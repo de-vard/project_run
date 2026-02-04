@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from app_run.views import company_details, RunViewSet, UsersViewSet, StartFiAPIView, StopFiAPIView
+from app_run.views import company_details, RunViewSet, UsersViewSet, StartFiAPIView, StopFiAPIView, AthleteInfoAPIView
 from project_run import settings
 
 router = DefaultRouter()
@@ -32,6 +32,7 @@ urlpatterns = [
     path('api/runs/<int:run_id>/start/', StartFiAPIView.as_view()),
     path('api/runs/<int:run_id>/stop/', StopFiAPIView.as_view()),
 
+    path('api/athlete_info/<int:user_id>/', AthleteInfoAPIView.as_view()),
     path('api/users/', UsersViewSet.as_view({'get': 'list'})),
     path('', include(router.urls)),
 
