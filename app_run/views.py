@@ -99,7 +99,7 @@ class AthleteInfoAPIView(views.APIView):
             'goals': obj.goals,
             'weight': obj.weight
         }
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_201_CREATED)
 
     def put(self, request, user_id, format=None):
         user = get_object_or_404(User, id=user_id)
