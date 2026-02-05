@@ -168,6 +168,6 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
 class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Challenge.objects.all()
     serializer_class = ChallengeSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
     search_fields = ['athlete_id']  # Указываем поля по которым будет вестись поиск
