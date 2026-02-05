@@ -82,13 +82,13 @@ class StopFiAPIView(views.APIView):
         obj.status = Run.Actions.FINISHED
         obj.save()
 
-        count_finished = Run.objects.filter(status='finished', athlete=request.user).count()
-
-        if count_finished == 10:
-            challenger = Challenge()
-            challenger.athlete = request.user
-            challenger.full_name = "Сделай 10 Забегов!"
-            challenger.save()
+        if request.user.is_authenticated:
+            count_finished = Run.objects.filter(status='finished', athlete=request.user).count()
+            if count_finished == 10:
+                challenger = Challenge()
+                challenger.athlete = request.user
+                challenger.full_name = "Сделай 10 Забегов!"
+                challenger.save()
 
         data = {
             'id': obj.id,
