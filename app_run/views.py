@@ -169,29 +169,21 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
 class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Challenge.objects.all()
     serializer_class = ChallengeSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['athlete']  # ← вот это главное
 
     def get_queryset(self):
+        # Если передан ?athlete= → фильтруем по нему
+        # Если НЕ передан → можно показывать свои (или все, или ничего — зависит от бизнес-логики)
+
+        queryset = Challenge.objects.all()
+
+        athlete_id = self.request.query_params.get('athlete')
+        if athlete_id:
+            return queryset.filter(athlete_id=athlete_id)
+
+        # Если параметра нет — показываем только свои (как было раньше)
         if self.request.user.is_authenticated:
-            return Challenge.objects.filter(athlete=self.request.user)
-        return Challenge.objects.none()  # или Challenge.objects.none()
-# class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = Challenge.objects.all()
-#     serializer_class = ChallengeSerializer
-#
-#     def list(self, request, *args, **kwargs):
-#         queryset = self.get_queryset().filter(athlete=request.user)
-#         queryset = self.filter_queryset(queryset)
-#
-#         page = self.paginate_queryset(queryset)
-#         if page is not None:
-#             serializer = self.get_serializer(page, many=True)
-#             return self.get_paginated_response(serializer.data)
-#
-#         serializer = self.get_serializer(queryset, many=True)
-#         return Response(serializer.data)
-#
-#     def retrieve(self, request, *args, **kwargs):
-#         instance = self.get_object()
-#         # print(instance)
-#         serializer = self.get_serializer(instance)
-#         return Response(serializer.data)
+            return queryset.filter(athlete=self.request.user)
+
+        return Challenge.objects.none()
