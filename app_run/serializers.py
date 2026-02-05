@@ -53,5 +53,5 @@ class AthleteInfoSerializer(serializers.ModelSerializer):
 class ChallengeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Challenge
-        fields = ['full_name']
-        read_only_fields = ['full_name']
+        fields = ['full_name', 'athlete']
+        read_only_fields = ['full_name', 'athlete']

@@ -68,7 +68,7 @@ class StartFiAPIView(views.APIView):
 
 class StopFiAPIView(views.APIView):
     """Изменяем статус, что забег закончился """
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
@@ -82,13 +82,12 @@ class StopFiAPIView(views.APIView):
         obj.status = Run.Actions.FINISHED
         obj.save()
 
-        if request.user.is_authenticated:
-            count_finished = Run.objects.filter(status='finished', athlete=request.user).count()
-            if count_finished == 10:
-                challenger = Challenge()
-                challenger.athlete = request.user
-                challenger.full_name = "Сделай 10 Забегов!"
-                challenger.save()
+        count_finished = Run.objects.filter(status='finished', athlete=request.user).count()
+        if count_finished == 10:
+            challenger = Challenge()
+            challenger.athlete = request.user
+            challenger.full_name = "Сделай 10 Забегов!"
+            challenger.save()
 
         data = {
             'id': obj.id,
@@ -168,6 +167,5 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
 class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Challenge.objects.all()
     serializer_class = ChallengeSerializer
-    # permission_classes = [IsAuthenticated]
-    filter_backends = [SearchFilter]
-    search_fields = ['athlete_id']  # Указываем поля по которым будет вестись поиск
+
+
