@@ -4,6 +4,7 @@ from rest_framework import viewsets, views, status
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
@@ -67,6 +68,7 @@ class StartFiAPIView(views.APIView):
 
 class StopFiAPIView(views.APIView):
     """Изменяем статус, что забег закончился """
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
@@ -166,5 +168,6 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
 class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Challenge.objects.all()
     serializer_class = ChallengeSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
     search_fields = ['athlete_id']  # Указываем поля по которым будет вестись поиск
