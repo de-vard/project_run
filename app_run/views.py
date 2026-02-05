@@ -68,7 +68,7 @@ class StartFiAPIView(views.APIView):
 
 class StopFiAPIView(views.APIView):
     """Изменяем статус, что забег закончился """
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
