@@ -9,8 +9,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import OrderingFilter
 
-from app_run.models import Run, AthleteInfo
-from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer
+from app_run.models import Run, AthleteInfo, Challenge
+from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer, ChallengeSerializer
 
 
 class RunPagination(PageNumberPagination):
@@ -79,6 +79,14 @@ class StopFiAPIView(views.APIView):
 
         obj.status = Run.Actions.FINISHED
         obj.save()
+
+        count_finished = Run.objects.filter(status='finished').count()
+
+        if count_finished == 10:
+            challenger = Challenge()
+            challenger.athlete = request.user
+            challenger.full_name = "Сделай 10 Забегов!"
+            challenger.save()
 
         data = {
             'id': obj.id,
@@ -153,3 +161,10 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         parameter = self._check_parameter()
         staff = self._is_coach(parameter)
         return queryset if not parameter else queryset.filter(is_staff=staff)
+
+
+class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['athlete_id']  # Указываем поля по которым будет вестись поиск

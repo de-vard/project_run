@@ -32,3 +32,7 @@ class AthleteInfo(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 
+class Challenge(models.Model):
+    """Модель для челленджей"""
+    full_name = models.TextField()
+    athlete = models.ForeignKey(User, on_delete=models.CASCADE)
