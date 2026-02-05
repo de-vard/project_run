@@ -170,20 +170,28 @@ class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Challenge.objects.all()
     serializer_class = ChallengeSerializer
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset().filter(athlete=request.user)
-        queryset = self.filter_queryset(queryset)
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        # print(instance)
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return Challenge.objects.filter(athlete=self.request.user)
+        return Challenge.objects.none()  # или Challenge.objects.none()
+# class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = Challenge.objects.all()
+#     serializer_class = ChallengeSerializer
+#
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.get_queryset().filter(athlete=request.user)
+#         queryset = self.filter_queryset(queryset)
+#
+#         page = self.paginate_queryset(queryset)
+#         if page is not None:
+#             serializer = self.get_serializer(page, many=True)
+#             return self.get_paginated_response(serializer.data)
+#
+#         serializer = self.get_serializer(queryset, many=True)
+#         return Response(serializer.data)
+#
+#     def retrieve(self, request, *args, **kwargs):
+#         instance = self.get_object()
+#         # print(instance)
+#         serializer = self.get_serializer(instance)
+#         return Response(serializer.data)
