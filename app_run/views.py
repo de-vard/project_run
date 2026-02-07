@@ -175,8 +175,6 @@ class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['athlete']  # ← вот это главное
 
     def get_queryset(self):
-        # Если передан ?athlete= → фильтруем по нему
-        # Если НЕ передан → можно показывать свои (или все, или ничего — зависит от бизнес-логики)
 
         queryset = Challenge.objects.all()
 
@@ -184,7 +182,6 @@ class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
         if athlete_id:
             return queryset.filter(athlete_id=athlete_id)
 
-        # Если параметра нет — показываем только свои (как было раньше)
         if self.request.user.is_authenticated:
             return queryset.filter(athlete=self.request.user)
 

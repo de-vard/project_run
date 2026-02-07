@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     
     # local
     'app_run',
+    'positions',
 ]
 
 # Django Debug Toolbar
