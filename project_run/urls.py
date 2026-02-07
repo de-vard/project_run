@@ -25,6 +25,7 @@ from project_run import settings
 
 router = DefaultRouter()
 router.register('api/runs', RunViewSet)
+router.register('api/positions', PositionViewSet)
 # router.register('api/users', UsersViewSet)
 
 urlpatterns = [
@@ -37,7 +38,7 @@ urlpatterns = [
     path('api/athlete_info/<int:user_id>/', AthleteInfoAPIView.as_view()),
     path('api/users/', UsersViewSet.as_view({'get': 'list'})),
 
-    path('api/positions/<int:position_id>/', PositionViewSet.as_view({'get': 'list'})),
+
 
     path('api/challenges/', ChallengeViewSet.as_view({'get': 'list'})),
 
