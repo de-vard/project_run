@@ -81,7 +81,18 @@ class StopFiAPIView(views.APIView):
             )
 
         obj.status = Run.Actions.FINISHED
-        obj.distance = geodesic(obj.positions.latitude,  obj.positions.longitude).kilometers
+        positions = obj.positions.all()
+
+        if positions.count() < 2:
+            return Response(
+                {'error': 'Not enough positions to calculate distance'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        start = (positions.first().latitude, positions.first().longitude)
+        finish = (positions.last().latitude, positions.last().longitude)
+
+        obj.distance = geodesic(start, finish).kilometers
         obj.save()
 
 
@@ -95,6 +106,9 @@ class StopFiAPIView(views.APIView):
                 athlete=obj.athlete,
                 full_name="Сделай 10 Забегов!"
             )
+
+
+
 
         data = {
             'id': obj.id,
