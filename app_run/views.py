@@ -4,7 +4,7 @@ from rest_framework import viewsets, views, status
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from geopy.distance import geodesic
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
@@ -43,6 +43,8 @@ class RunViewSet(viewsets.ModelViewSet):
     pagination_class = RunPagination
 
 
+
+
 class StartFiAPIView(views.APIView):
     """Изменяем статус, что забег продолжается """
 
@@ -69,8 +71,6 @@ class StartFiAPIView(views.APIView):
 class StopFiAPIView(views.APIView):
     """Изменяем статус, что забег закончился """
 
-    # permission_classes = [IsAuthenticated]
-
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
@@ -81,7 +81,10 @@ class StopFiAPIView(views.APIView):
             )
 
         obj.status = Run.Actions.FINISHED
+        obj.distance = geodesic(obj.positions.latitude,  obj.positions.longitude).kilometers
         obj.save()
+
+
         finished_count = Run.objects.filter(
             athlete=obj.athlete,
             status=Run.Actions.FINISHED

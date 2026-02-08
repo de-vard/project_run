@@ -23,6 +23,7 @@ class Run(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     comment = models.TextField()
     athlete = models.ForeignKey(User, on_delete=models.CASCADE)
+    distance = models.FloatField(blank=True, null=True)
 
 
 class AthleteInfo(models.Model):

@@ -38,8 +38,6 @@ urlpatterns = [
     path('api/athlete_info/<int:user_id>/', AthleteInfoAPIView.as_view()),
     path('api/users/', UsersViewSet.as_view({'get': 'list'})),
 
-
-
     path('api/challenges/', ChallengeViewSet.as_view({'get': 'list'})),
 
     path('', include(router.urls)),
