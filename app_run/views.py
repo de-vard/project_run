@@ -81,18 +81,21 @@ class StopFiAPIView(views.APIView):
             )
 
         obj.status = Run.Actions.FINISHED
-        positions = obj.positions.all()
+        positions = obj.positions.order_by('id')
+        total_distance = 0.0
 
         if positions.count() < 2:
             return Response(
                 {'error': 'Not enough positions to calculate distance'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        for i in range(len(positions) - 1):
+            p1 = (positions[i].latitude, positions[i].longitude)
+            p2 = (positions[i + 1].latitude, positions[i + 1].longitude)
+            total_distance += geodesic(p1, p2).kilometers
 
-        start = (positions.first().latitude, positions.first().longitude)
-        finish = (positions.last().latitude, positions.last().longitude)
 
-        obj.distance = geodesic(start, finish).kilometers
+        obj.distance = total_distance
         obj.save()
 
 
