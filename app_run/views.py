@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models import Sum, Count
 from rest_framework import viewsets, views, status
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
@@ -10,8 +11,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import OrderingFilter
 
-from app_run.models import Run, AthleteInfo, Challenge
-from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer, ChallengeSerializer
+from app_run.models import Run, AthleteInfo
+from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer
+from challenges.models import Challenge
 
 
 class RunPagination(PageNumberPagination):
@@ -41,8 +43,6 @@ class RunViewSet(viewsets.ModelViewSet):
     filterset_fields = ['status', 'athlete']  # Поля, по которым будет происходить фильтрация
     ordering_fields = ['created_at']  # Поля по которым будет возможна сортировка
     pagination_class = RunPagination
-
-
 
 
 class StartFiAPIView(views.APIView):
@@ -94,24 +94,29 @@ class StopFiAPIView(views.APIView):
             p2 = (positions[i + 1].latitude, positions[i + 1].longitude)
             total_distance += geodesic(p1, p2).kilometers
 
-
         obj.distance = total_distance
         obj.save()
 
+        total_data = Run.objects.filter(athlete=obj.athlete, status=Run.Actions.FINISHED).aggregate(
+            total_sum=Sum('distance'),
+            total_count=Count('id')
+        )
+        if total_data['total_sum'] > 50:
+            Challenge.objects.get_or_create(
+                athlete=obj.athlete,
+                full_name="Пробеги 50 километров!"
+            )
 
-        finished_count = Run.objects.filter(
-            athlete=obj.athlete,
-            status=Run.Actions.FINISHED
-        ).count()
+        # finished_count = Run.objects.filter(
+        #     athlete=obj.athlete,
+        #     status=Run.Actions.FINISHED
+        # ).count()
 
-        if finished_count >= 10:
+        if total_data['total_count'] >= 10:
             Challenge.objects.get_or_create(
                 athlete=obj.athlete,
                 full_name="Сделай 10 Забегов!"
             )
-
-
-
 
         data = {
             'id': obj.id,
@@ -186,23 +191,3 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         parameter = self._check_parameter()
         staff = self._is_coach(parameter)
         return queryset if not parameter else queryset.filter(is_staff=staff)
-
-
-class ChallengeViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Challenge.objects.all()
-    serializer_class = ChallengeSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['athlete']  # ← вот это главное
-
-    def get_queryset(self):
-
-        queryset = Challenge.objects.all()
-
-        athlete_id = self.request.query_params.get('athlete')
-        if athlete_id:
-            return queryset.filter(athlete_id=athlete_id)
-
-        if self.request.user.is_authenticated:
-            return queryset.filter(athlete=self.request.user)
-
-        return Challenge.objects.none()

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Run, AthleteInfo, Challenge
+from .models import Run, AthleteInfo
 
 
 class UsersSerializer(serializers.ModelSerializer):
@@ -50,8 +50,3 @@ class AthleteInfoSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', ]
 
 
-class ChallengeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Challenge
-        fields = ['full_name', 'athlete']
-        read_only_fields = ['full_name', 'athlete']
