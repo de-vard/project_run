@@ -33,10 +33,11 @@ class UploadExcelData(APIView):
         for row in sheet.iter_rows(min_row=2, values_only=True):
             data = {
                 'name': row[0],
-                'latitude': row[2],
-                'longitude': row[3],
-                'picture': row[4],
-                'value': row[5],
+                'uid': row[1],
+                'value': row[2],
+                'latitude': row[3],
+                'longitude': row[4],
+                'picture': row[5],
             }
 
             serializer = CollectibleItemSerializer(data=data)
