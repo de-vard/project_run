@@ -1,0 +1,58 @@
+from openpyxl import load_workbook
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from artifacts.models import CollectibleItem
+from artifacts.serializers import CollectibleItemSerializer
+
+
+class CollectibleItemViewSet(viewsets.ModelViewSet):
+    queryset = CollectibleItem.objects.all()
+    serializer_class = CollectibleItemSerializer
+
+
+class UploadExcelData(APIView):
+    """Загрузка и парсинг данных """
+
+    def post(self, request):
+        file = request.FILES.get('file')
+
+        if not file:
+            return Response(
+                {'detail': 'Файл не передан'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        wb = load_workbook(file)
+        sheet = wb.active
+
+        created_items = []
+        invalid_rows = []
+
+        # пропускаем заголовок
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            data = {
+                'name': row[0],
+                'latitude': row[2],
+                'longitude': row[3],
+                'picture': row[4],
+                'value': row[5],
+            }
+
+            serializer = CollectibleItemSerializer(data=data)
+
+            if serializer.is_valid():
+                serializer.save()
+                created_items.append(serializer.data)
+            else:
+
+                invalid_rows.append(list(row))
+
+        return Response(
+            {
+                'created_count': len(created_items),
+                'invalid_rows': invalid_rows,
+            },
+            status=status.HTTP_200_OK
+        )

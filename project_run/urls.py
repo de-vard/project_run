@@ -1,24 +1,9 @@
-"""
-URL configuration for project_run project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from app_run.views import company_details, RunViewSet, UsersViewSet, StartFiAPIView, StopFiAPIView, AthleteInfoAPIView
+from artifacts.views import CollectibleItemViewSet, UploadExcelData
 from challenges.views import ChallengeViewSet
 
 from positions.views import PositionViewSet
@@ -27,7 +12,7 @@ from project_run import settings
 router = DefaultRouter()
 router.register('api/runs', RunViewSet)
 router.register('api/positions', PositionViewSet)
-# router.register('api/users', UsersViewSet)
+router.register('api/collectible_item/', CollectibleItemViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,11 +26,13 @@ urlpatterns = [
 
     path('api/challenges/', ChallengeViewSet.as_view({'get': 'list'})),
 
+    path('api/upload_file/', UploadExcelData.as_view()),
+
     path('', include(router.urls)),
 
 ]
 
-
 if settings.base.DEBUG:
     import debug_toolbar
+
     urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
