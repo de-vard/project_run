@@ -13,7 +13,7 @@ class CollectibleItemViewSet(viewsets.ModelViewSet):
 
 
 class UploadExcelData(APIView):
-    """Загрузка и парсинг данных """
+    """Загрузка и парсинг данных"""
 
     def post(self, request):
         file = request.FILES.get('file')
@@ -27,7 +27,6 @@ class UploadExcelData(APIView):
         wb = load_workbook(file)
         sheet = wb.active
 
-        created_items = []
         invalid_rows = []
 
         # пропускаем заголовок
@@ -44,15 +43,9 @@ class UploadExcelData(APIView):
 
             if serializer.is_valid():
                 serializer.save()
-                created_items.append(serializer.data)
             else:
 
                 invalid_rows.append(list(row))
 
-        return Response(
-            {
-                'created_count': len(created_items),
-                'invalid_rows': invalid_rows,
-            },
-            status=status.HTTP_200_OK
-        )
+        #  возвращаем СПИСОК, а не dict
+        return Response(invalid_rows, status=status.HTTP_200_OK)
