@@ -12,7 +12,7 @@ from project_run import settings
 router = DefaultRouter()
 router.register('api/runs', RunViewSet)
 router.register('api/positions', PositionViewSet)
-router.register('api/collectible_item/', CollectibleItemViewSet)
+router.register('api/collectible_item', CollectibleItemViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
