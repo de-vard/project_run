@@ -1,11 +1,9 @@
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.db.models import Sum, Count
 from rest_framework import viewsets, views, status
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
-from geopy.distance import geodesic
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
@@ -13,7 +11,8 @@ from rest_framework.filters import OrderingFilter
 
 from app_run.models import Run, AthleteInfo
 from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer
-from challenges.models import Challenge
+from app_run.services.challenges import ChallengeService
+from app_run.services.positions import PositionService, NotEnoughPositions
 
 
 class RunPagination(PageNumberPagination):
@@ -74,6 +73,7 @@ class StopFiAPIView(views.APIView):
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
+        # Проверка бизнес-правила: завершить можно только текущий забег
         if obj.status != Run.Actions.PROGRESS:
             return Response(
                 {'error': f'Cannot start run from {obj.status} status'},
@@ -81,42 +81,17 @@ class StopFiAPIView(views.APIView):
             )
 
         obj.status = Run.Actions.FINISHED
-        positions = obj.positions.order_by('id')
-        total_distance = 0.0
 
-        if positions.count() < 2:
-            return Response(
-                {'error': 'Not enough positions to calculate distance'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        for i in range(len(positions) - 1):
-            p1 = (positions[i].latitude, positions[i].longitude)
-            p2 = (positions[i + 1].latitude, positions[i + 1].longitude)
-            total_distance += geodesic(p1, p2).kilometers
+        try:  # Пытаемся вычислить дистанцию
+            obj.distance = PositionService(obj).get_distance()
+            obj.save()
+        except NotEnoughPositions as e:
+            return Response({'error': str(e)}, status=400)
 
-        obj.distance = total_distance
-        obj.save()
+        # Начисляем достижения — отдельный сервис
+        ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
 
-        total_data = Run.objects.filter(athlete=obj.athlete, status=Run.Actions.FINISHED).aggregate(
-            total_sum=Sum('distance'),
-            total_count=Count('id')
-        )
-        if total_data['total_sum'] > 50:
-            Challenge.objects.get_or_create(
-                athlete=obj.athlete,
-                full_name="Пробеги 50 километров!"
-            )
 
-        # finished_count = Run.objects.filter(
-        #     athlete=obj.athlete,
-        #     status=Run.Actions.FINISHED
-        # ).count()
-
-        if total_data['total_count'] >= 10:
-            Challenge.objects.get_or_create(
-                athlete=obj.athlete,
-                full_name="Сделай 10 Забегов!"
-            )
 
         data = {
             'id': obj.id,
