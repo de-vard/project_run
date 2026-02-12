@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'app_run',
     'positions',
     'challenges',
+    'artifacts'
 ]
 
 # Django Debug Toolbar
