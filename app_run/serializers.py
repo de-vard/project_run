@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from artifacts.models import CollectibleItem
 from .models import Run, AthleteInfo
 
 
@@ -25,8 +26,15 @@ class UsersSerializer(serializers.ModelSerializer):
         return obj.run_set.filter(status='finished').count()
 
 
+class CollectibleItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CollectibleItem
+        fields = ['id', 'name', 'uid', 'picture', 'value', 'latitude', 'longitude']
+
+
 class UsersSerializerDetail(UsersSerializer):
     """Сериализатор детально просмотра пользователя """
+    items = CollectibleItemSerializer(many=True, read_only=True)
 
     class Meta(UsersSerializer.Meta):
         fields = UsersSerializer.Meta.fields + ["items"]
