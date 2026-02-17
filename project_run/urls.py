@@ -13,6 +13,7 @@ router = DefaultRouter()
 router.register('api/runs', RunViewSet)
 router.register('api/positions', PositionViewSet)
 router.register('api/collectible_item', CollectibleItemViewSet)
+router.register(r'api/users', UsersViewSet, basename='users')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -22,7 +23,7 @@ urlpatterns = [
     path('api/runs/<int:run_id>/stop/', StopFiAPIView.as_view()),
 
     path('api/athlete_info/<int:user_id>/', AthleteInfoAPIView.as_view()),
-    path('api/users/', UsersViewSet.as_view({'get': 'list'})),
+    # path('api/users/', UsersViewSet.as_view({'get': 'list'})),
 
     path('api/challenges/', ChallengeViewSet.as_view({'get': 'list'})),
 
