@@ -159,15 +159,15 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         return pr == "coach"
 
     def get_queryset(self):
-        """Переопределяем квэрисет"""
-        queryset = User.objects.all().exclude(is_superuser=True)
-
-        if self.action == "retrieve":
-            return queryset.prefetch_related("collectible_items")
+        queryset = User.objects.exclude(is_superuser=True)
 
         parameter = self._check_parameter()
         if parameter:
-            return queryset.filter(is_staff=self._is_coach(parameter))
+            queryset = queryset.filter(is_staff=self._is_coach(parameter))
+
+        if self.action == "retrieve":
+            queryset = queryset.prefetch_related("collectible_items")
+
         return queryset
 
     def get_serializer_class(self):
