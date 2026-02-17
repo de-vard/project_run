@@ -29,7 +29,7 @@ class UsersSerializerDetail(UsersSerializer):
     """Сериализатор детально просмотра пользователя """
 
     class Meta(UsersSerializer.Meta):
-        fields = UsersSerializer.Meta.fields + ["collectible_items"]
+        fields = UsersSerializer.Meta.fields + ["items"]
 
 
 class UserNestedSerializer(serializers.ModelSerializer):
