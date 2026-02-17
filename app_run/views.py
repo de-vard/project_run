@@ -10,7 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import OrderingFilter
 
 from app_run.models import Run, AthleteInfo
-from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer
+from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer, UsersSerializerDetail
 from app_run.services.challenges import ChallengeService
 from app_run.services.positions import PositionService, NotEnoughPositions
 
@@ -159,9 +159,9 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         """Переопределяем квэрисет"""
-        if self.action == "list":
-            queryset = User.objects.all().exclude(is_superuser=True)
-        elif self.action == "retrieve":
+        queryset = User.objects.all().exclude(is_superuser=True)
+
+        if self.action == "retrieve":
             queryset = User.objects.all().exclude(is_superuser=True).prefetch_related("collectible_items")
 
         parameter = self._check_parameter()
@@ -173,5 +173,5 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == "list":
             return UsersSerializer
         elif self.action == "retrieve":
-            pass
+            return UsersSerializerDetail
         return super().get_serializer_class()
