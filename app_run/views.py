@@ -161,10 +161,13 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         queryset = User.objects.exclude(is_superuser=True)
 
-        parameter = self._check_parameter()
-        if parameter:
-            queryset = queryset.filter(is_staff=self._is_coach(parameter))
+        # 🔹 фильтр по type — ТОЛЬКО для списка
+        if self.action == "list":
+            parameter = self._check_parameter()
+            if parameter:
+                queryset = queryset.filter(is_staff=self._is_coach(parameter))
 
+        # 🔹 для detail — только prefetch
         if self.action == "retrieve":
             queryset = queryset.prefetch_related("collectible_items")
 
