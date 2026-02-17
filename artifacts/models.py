@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class CollectibleItem(models.Model):
@@ -10,4 +10,4 @@ class CollectibleItem(models.Model):
     longitude = models.FloatField()
     picture = models.URLField()
     value = models.IntegerField()
-    user = models.ManyToManyField(User, related_name='collectible_items')
+    user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='collectible_items')
