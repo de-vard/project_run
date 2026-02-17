@@ -162,7 +162,7 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = User.objects.all().exclude(is_superuser=True)
 
         if self.action == "retrieve":
-            queryset = queryset.prefetch_related("collectible_items")
+            return queryset.prefetch_related("collectible_items")
 
         parameter = self._check_parameter()
         if parameter:
