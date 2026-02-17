@@ -170,7 +170,7 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
 
         # 3️⃣ для detail — добавляем prefetch, но не фильтруем по type
         if self.action == "retrieve":
-            queryset = queryset.prefetch_related("collectible_items")
+            queryset = queryset.prefetch_related("items")
 
         return queryset
 
