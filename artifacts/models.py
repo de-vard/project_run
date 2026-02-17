@@ -10,4 +10,4 @@ class CollectibleItem(models.Model):
     longitude = models.FloatField()
     picture = models.URLField()
     value = models.IntegerField()
-    user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='collectible_items')
+    user = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='items')
