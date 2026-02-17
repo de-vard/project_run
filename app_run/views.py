@@ -162,11 +162,12 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = User.objects.all().exclude(is_superuser=True)
 
         if self.action == "retrieve":
-            queryset = User.objects.all().exclude(is_superuser=True).prefetch_related("collectible_items")
+            queryset = queryset.prefetch_related("collectible_items")
 
         parameter = self._check_parameter()
-        staff = self._is_coach(parameter)
-        return queryset if not parameter else queryset.filter(is_staff=staff)
+        if parameter:
+            return queryset.filter(is_staff=self._is_coach(parameter))
+        return queryset
 
     def get_serializer_class(self):
         """Переопределяем получение сериализатора"""
