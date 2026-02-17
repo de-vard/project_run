@@ -138,6 +138,7 @@ class AthleteInfoAPIView(views.APIView):
 
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):
     """Возвращение пользователей по параметру"""
+    serializer_class = UsersSerializer
     filter_backends = [SearchFilter, OrderingFilter]  # Подключаем SearchFilter
     search_fields = ['first_name', 'last_name']  # Указываем поля по которым будет вестись поиск
     ordering_fields = ['date_joined']  # Поля по которым будет возможна сортировка
