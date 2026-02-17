@@ -5,6 +5,7 @@ from .models import Run, AthleteInfo
 
 
 class UsersSerializer(serializers.ModelSerializer):
+    """Сериализатор списка пользователя """
     type = serializers.SerializerMethodField()
     runs_finished = serializers.SerializerMethodField()
 
@@ -22,6 +23,13 @@ class UsersSerializer(serializers.ModelSerializer):
     def get_runs_finished(self, obj):
         """Подсчет завершенных забегов"""
         return obj.run_set.filter(status='finished').count()
+
+
+class UsersSerializerDetail(UsersSerializer):
+    """Сериализатор детально просмотра пользователя """
+
+    class Meta(UsersSerializer.Meta):
+        fields = UsersSerializer.Meta.fields + ["collectible_items"]
 
 
 class UserNestedSerializer(serializers.ModelSerializer):
@@ -48,5 +56,3 @@ class AthleteInfoSerializer(serializers.ModelSerializer):
         model = AthleteInfo
         fields = ['goals', 'weight', 'id']
         read_only_fields = ['id', ]
-
-

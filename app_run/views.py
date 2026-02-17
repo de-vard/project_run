@@ -91,8 +91,6 @@ class StopFiAPIView(views.APIView):
         # Начисляем достижения — отдельный сервис
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
 
-
-
         data = {
             'id': obj.id,
             'status': obj.status,
@@ -140,7 +138,6 @@ class AthleteInfoAPIView(views.APIView):
 
 class UsersViewSet(viewsets.ReadOnlyModelViewSet):
     """Возвращение пользователей по параметру"""
-    serializer_class = UsersSerializer
     filter_backends = [SearchFilter, OrderingFilter]  # Подключаем SearchFilter
     search_fields = ['first_name', 'last_name']  # Указываем поля по которым будет вестись поиск
     ordering_fields = ['date_joined']  # Поля по которым будет возможна сортировка
@@ -162,7 +159,19 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         """Переопределяем квэрисет"""
-        queryset = (User.objects.all().exclude(is_superuser=True))
+        if self.action == "list":
+            queryset = User.objects.all().exclude(is_superuser=True)
+        elif self.action == "retrieve":
+            queryset = User.objects.all().exclude(is_superuser=True).prefetch_related("collectible_items")
+
         parameter = self._check_parameter()
         staff = self._is_coach(parameter)
         return queryset if not parameter else queryset.filter(is_staff=staff)
+
+    def get_serializer_class(self):
+        """Переопределяем получение сериализатора"""
+        if self.action == "list":
+            return UsersSerializer
+        elif self.action == "retrieve":
+            pass
+        return super().get_serializer_class()
