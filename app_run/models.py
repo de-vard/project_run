@@ -24,6 +24,7 @@ class Run(models.Model):
     comment = models.TextField()
     athlete = models.ForeignKey(User, on_delete=models.CASCADE)
     distance = models.FloatField(blank=True, null=True)
+    run_time_seconds = models.IntegerField(null=True, blank=True)
 
 
 class AthleteInfo(models.Model):

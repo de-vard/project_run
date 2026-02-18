@@ -13,6 +13,7 @@ from app_run.models import Run, AthleteInfo
 from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer, UsersSerializerDetail
 from app_run.services.challenges import ChallengeService
 from app_run.services.positions import PositionService, NotEnoughPositions
+from app_run.services.run_time_seconds import RunTimeCalculator
 
 
 class RunPagination(PageNumberPagination):
@@ -81,6 +82,9 @@ class StopFiAPIView(views.APIView):
             )
 
         obj.status = Run.Actions.FINISHED
+
+        # Обновляем время забега
+        RunTimeCalculator.update_run_time(obj)
 
         try:  # Пытаемся вычислить дистанцию
             obj.distance = PositionService(obj).get_distance()
@@ -159,16 +163,11 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         return pr == "coach"
 
     def get_queryset(self):
-        # 1️⃣ базовый queryset
         queryset = User.objects.exclude(is_superuser=True)
-
-        # 2️⃣ применяем фильтр по type ТОЛЬКО для списка
         if self.action == "list":
             parameter = self._check_parameter()
             if parameter:
                 queryset = queryset.filter(is_staff=self._is_coach(parameter))
-
-        # 3️⃣ для detail — добавляем prefetch, но не фильтруем по type
         if self.action == "retrieve":
             queryset = queryset.prefetch_related("items")
 
