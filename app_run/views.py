@@ -91,8 +91,8 @@ class StopFiAPIView(views.APIView):
             obj.distance = PositionService(obj).get_distance()
             obj.save()
         except NotEnoughPositions as e:
-            # return Response({'error': str(e)}, status=400)
-            obj.distance = 0
+            return Response({'error': str(e)}, status=400)
+
         # Начисляем достижения — отдельный сервис
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
 
@@ -164,18 +164,15 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         return pr == "coach"
 
     def get_queryset(self):
-        queryset = User.objects.exclude(is_superuser=True).annotate(
-            runs_finished=Count(
-                'runs',
-                filter=Q(runs__status='finished')  # фильтрация
-            )
-        )
+        queryset = User.objects.exclude(is_superuser=True)
         if self.action == "list":
             parameter = self._check_parameter()
             if parameter:
                 queryset = queryset.filter(is_staff=self._is_coach(parameter))
         if self.action == "retrieve":
             queryset = queryset.prefetch_related("items")
+            # ← самое важное — аннотация в самом конце
+        queryset = queryset.annotate(runs_finished=Count('runs', filter=Q(runs__status=Run.Actions.FINISHED)))
 
         return queryset
 
