@@ -164,7 +164,7 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         return pr == "coach"
 
     def get_queryset(self):
-        queryset = User.objects.exclude(is_superuser=True).prefetch_related('runs').annotate(
+        queryset = User.objects.exclude(is_superuser=True).annotate(
             runs_finished=Count(
                 'runs',
                 filter=Q(runs__status='finished')  # фильтрация
