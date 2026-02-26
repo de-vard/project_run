@@ -91,8 +91,8 @@ class StopFiAPIView(views.APIView):
             obj.distance = PositionService(obj).get_distance()
             obj.save()
         except NotEnoughPositions as e:
-            return Response({'error': str(e)}, status=400)
-
+            # return Response({'error': str(e)}, status=400)
+            obj.distance = 0
         # Начисляем достижения — отдельный сервис
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
 
