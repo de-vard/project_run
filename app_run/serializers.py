@@ -8,7 +8,7 @@ from .models import Run, AthleteInfo
 class UsersSerializer(serializers.ModelSerializer):
     """Сериализатор списка пользователя """
     type = serializers.SerializerMethodField()
-    runs_finished = serializers.SerializerMethodField()
+    # runs_finished = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -21,9 +21,9 @@ class UsersSerializer(serializers.ModelSerializer):
     def get_type(self, obj):
         return "coach" if obj.is_staff else "athlete"
 
-    def get_runs_finished(self, obj):
-        """Подсчет завершенных забегов"""
-        return obj.run_set.filter(status='finished').count()
+    # def get_runs_finished(self, obj):
+    #     """Подсчет завершенных забегов"""
+    #     return obj.runs.filter(status='finished').count()
 
 
 class CollectibleItemSerializer(serializers.ModelSerializer):

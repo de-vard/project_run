@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.db.models import Count, Q
 from rest_framework import viewsets, views, status
 from rest_framework.decorators import api_view
 from rest_framework.filters import SearchFilter
@@ -163,7 +164,12 @@ class UsersViewSet(viewsets.ReadOnlyModelViewSet):
         return pr == "coach"
 
     def get_queryset(self):
-        queryset = User.objects.exclude(is_superuser=True)
+        queryset = User.objects.exclude(is_superuser=True).prefetch_related('runs').annotate(
+            runs_finished=Count(
+                'runs',
+                filter=Q(runs__status='finished')  # фильтрация
+            )
+        )
         if self.action == "list":
             parameter = self._check_parameter()
             if parameter:
