@@ -14,11 +14,7 @@ class PositionViewSet(viewsets.ModelViewSet):
     filterset_fields = ['run']
 
     def perform_create(self, serializer):
-        position = serializer.save()
-
-        # 1. Считаем distance и speed
+        position = serializer.save()  # сохраняем новую позицию
         processor = PositionProcessor(position)
-        processor.process()
-
-        # 2. Обрабатываем коллекционные предметы (оставляем как было)
-        CollectibleService(position).process()
+        processor.process()  # ← здесь вся магия
+        CollectibleService(position).process()  # оставляем как было

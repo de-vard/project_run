@@ -1,3 +1,4 @@
+from _decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Count, Q
@@ -94,7 +95,22 @@ class StopFiAPIView(views.APIView):
         except NotEnoughPositions as e:
             obj.distance = 0
 
-        obj.speed = RunStatsService.calculate_average_speed(obj)
+        last_position = obj.positions.order_by('-date_time').first()
+        if last_position:
+            obj.distance = last_position.distance
+        else:
+            obj.distance = Decimal('0.00')
+
+        # 3. Средняя скорость = расстояние(km) / время(часы) → км/ч
+        #    или м/с — смотря что нужно в ТЗ (в коде ниже — м/с)
+        if obj.run_time_seconds > 0 and obj.distance > 0:
+            meters = obj.distance * Decimal('1000')
+            obj.speed = (meters / Decimal(obj.run_time_seconds)).quantize(
+                Decimal('0.01'), rounding=ROUND_HALF_UP
+            )
+        else:
+            obj.speed = Decimal('0.00')
+
         obj.save()
         # Начисляем достижения — отдельный сервис
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()

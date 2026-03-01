@@ -49,6 +49,7 @@ class UserNestedSerializer(serializers.ModelSerializer):
 class RunSerializer(serializers.ModelSerializer):
     """Сериализатор для сущностей бега и вывода пользователей"""
     athlete_data = UserNestedSerializer(source='athlete', read_only=True)
+    speed = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
 
     class Meta:
         model = Run
