@@ -99,12 +99,8 @@ class StopFiAPIView(views.APIView):
         # Начисляем достижения — отдельный сервис
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
 
-        data = {
-            'id': obj.id,
-            'status': obj.status,
-            'message': 'Run started successfully'
-        }
-        return Response(data, status=status.HTTP_200_OK)
+        serializer = RunSerializer(obj, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AthleteInfoAPIView(views.APIView):
