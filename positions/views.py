@@ -4,6 +4,7 @@ from rest_framework import viewsets
 from app_run.services.collectibles import CollectibleService
 from positions.models import Position
 from positions.serializers import PositionSerializer
+from positions.services import PositionProcessor
 
 
 class PositionViewSet(viewsets.ModelViewSet):
@@ -14,4 +15,10 @@ class PositionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         position = serializer.save()
+
+        # 1. Считаем distance и speed
+        processor = PositionProcessor(position)
+        processor.process()
+
+        # 2. Обрабатываем коллекционные предметы (оставляем как было)
         CollectibleService(position).process()

@@ -8,7 +8,7 @@ class PositionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Position
-        fields = ['id', 'run', 'latitude', 'longitude', 'date_time']
+        fields = ['id', 'run', 'latitude', 'longitude', 'date_time', 'speed', 'distance']
         read_only_fields = ['id', ]
 
     def validate_run(self, value):

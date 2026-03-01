@@ -14,6 +14,7 @@ from app_run.models import Run, AthleteInfo
 from app_run.serializers import RunSerializer, UsersSerializer, AthleteInfoSerializer, UsersSerializerDetail
 from app_run.services.challenges import ChallengeService
 from app_run.services.positions import PositionService, NotEnoughPositions
+from app_run.services.run_stats import RunStatsService
 from app_run.services.run_time_seconds import RunTimeCalculator
 
 
@@ -92,6 +93,8 @@ class StopFiAPIView(views.APIView):
             obj.save()
         except NotEnoughPositions as e:
             obj.distance = 0
+
+        obj.speed = RunStatsService.calculate_average_speed(obj)
         obj.save()
         # Начисляем достижения — отдельный сервис
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
