@@ -77,32 +77,27 @@ class StopFiAPIView(views.APIView):
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
-        # Проверка бизнес-правила: завершить можно только текущий забег
         if obj.status != Run.Actions.PROGRESS:
             return Response(
-                {'error': f'Cannot start run from {obj.status} status'},
+                {'error': f'Cannot stop run from {obj.status} status'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         obj.status = Run.Actions.FINISHED
 
-        # Обновляем время забега
+        # 1. Обновляем время забега (это важно и должно остаться)
         RunTimeCalculator.update_run_time(obj)
 
-        try:  # Пытаемся вычислить дистанцию
-            obj.distance = PositionService(obj).get_distance()
-            obj.save()
-        except NotEnoughPositions as e:
-            obj.distance = 0
-
+        # 2. Берём финальную дистанцию из последней позиции
         last_position = obj.positions.order_by('-date_time').first()
         if last_position:
-            obj.distance = last_position.distance
+            obj.distance = last_position.distance.quantize(
+                Decimal('0.01'), rounding=ROUND_HALF_UP
+            )
         else:
             obj.distance = Decimal('0.00')
 
-        # 3. Средняя скорость = расстояние(km) / время(часы) → км/ч
-        #    или м/с — смотря что нужно в ТЗ (в коде ниже — м/с)
+        # 3. Средняя скорость в м/с
         if obj.run_time_seconds > 0 and obj.distance > 0:
             meters = obj.distance * Decimal('1000')
             obj.speed = (meters / Decimal(obj.run_time_seconds)).quantize(
@@ -111,13 +106,14 @@ class StopFiAPIView(views.APIView):
         else:
             obj.speed = Decimal('0.00')
 
-        obj.save()
-        # Начисляем достижения — отдельный сервис
+        obj.save(
+            update_fields=['status', 'distance', 'speed', 'run_time_seconds']
+        )
+
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
 
         serializer = RunSerializer(obj, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class AthleteInfoAPIView(views.APIView):
     """Для дополнительной информации от пользователя"""
