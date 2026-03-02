@@ -84,11 +84,11 @@ class StopFiAPIView(views.APIView):
 
         obj.status = Run.Actions.FINISHED
 
-        # 1. Считаем время
+        # 1. Обновляем время
         RunTimeCalculator.update_run_time(obj)
 
-        # 2. Используем сервис статистики
-        RunStatsService(obj).calculate()   # ← ВАЖНО
+        # 2. Считаем статистику через сервис
+        RunStatsService().calculate(obj)
 
         obj.save(update_fields=[
             'status',
