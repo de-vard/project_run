@@ -84,10 +84,17 @@ class StopFiAPIView(views.APIView):
 
         # ── Расчёт статистики прямо здесь ────────────────────────
         last_pos = obj.positions.order_by('-date_time').first()
+        print(f"Run {obj.id} FINISH DEBUG:")
+        print(f"  run_time_seconds   = {obj.run_time_seconds}")
+        print(f"  last distance      = {last_pos.distance if last_pos else 'нет позиций'}")
+
         if last_pos and last_pos.distance:
             obj.distance = Decimal(str(last_pos.distance)).quantize(Decimal('0.01'))
+            print(f"  сумма всех distance в Position = {obj.distance}")
         else:
             obj.distance = Decimal('0.00')
+            print(f"  рассчитанная скорость = {obj.distance.quantize(Decimal('0.01'))} м/с")
+            print(f"  в км/ч                = {(obj.distance * Decimal('3.6')).quantize(Decimal('0.01'))}")
 
         if obj.run_time_seconds > 0 and obj.distance > 0:
             meters = obj.distance * Decimal(1000)
@@ -104,6 +111,8 @@ class StopFiAPIView(views.APIView):
 
         serializer = RunSerializer(obj, context={'request': request})
         return Response(serializer.data)
+
+
 class AthleteInfoAPIView(views.APIView):
     """Для дополнительной информации от пользователя"""
 
