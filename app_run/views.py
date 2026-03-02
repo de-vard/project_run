@@ -115,6 +115,7 @@ class StopFiAPIView(views.APIView):
         serializer = RunSerializer(obj, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class AthleteInfoAPIView(views.APIView):
     """Для дополнительной информации от пользователя"""
 

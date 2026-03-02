@@ -29,7 +29,12 @@ class Run(models.Model):
     )
     distance = models.FloatField(blank=True, null=True)
     run_time_seconds = models.IntegerField(null=True, blank=True)
-
+    speed = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        default=0,
+        help_text="Средняя скорость за забег в м/с"
+    )
 
 class AthleteInfo(models.Model):
     """Для дополнительной информации от пользователя"""
