@@ -72,7 +72,6 @@ class StartFiAPIView(views.APIView):
 
 
 class StopFiAPIView(views.APIView):
-    """Изменяем статус, что забег закончился """
 
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
@@ -85,35 +84,23 @@ class StopFiAPIView(views.APIView):
 
         obj.status = Run.Actions.FINISHED
 
-        # 1. Обновляем время забега (это важно и должно остаться)
+        # 1. Считаем время
         RunTimeCalculator.update_run_time(obj)
 
-        # 2. Берём финальную дистанцию из последней позиции
-        last_position = obj.positions.order_by('-date_time').first()
-        if last_position:
-            obj.distance = last_position.distance.quantize(
-                Decimal('0.01'), rounding=ROUND_HALF_UP
-            )
-        else:
-            obj.distance = Decimal('0.00')
+        # 2. Используем сервис статистики
+        RunStatsService(obj).calculate()   # ← ВАЖНО
 
-        # 3. Средняя скорость в м/с
-        if obj.run_time_seconds > 0 and obj.distance > 0:
-            meters = obj.distance * Decimal('1000')
-            obj.speed = (meters / Decimal(obj.run_time_seconds)).quantize(
-                Decimal('0.01'), rounding=ROUND_HALF_UP
-            )
-        else:
-            obj.speed = Decimal('0.00')
-
-        obj.save(
-            update_fields=['status', 'distance', 'speed', 'run_time_seconds']
-        )
+        obj.save(update_fields=[
+            'status',
+            'distance',
+            'speed',
+            'run_time_seconds'
+        ])
 
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
 
         serializer = RunSerializer(obj, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
 
 
 class AthleteInfoAPIView(views.APIView):
