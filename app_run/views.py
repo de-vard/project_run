@@ -72,37 +72,38 @@ class StartFiAPIView(views.APIView):
 
 
 class StopFiAPIView(views.APIView):
-
     def post(self, request, run_id):
         obj = get_object_or_404(Run, id=run_id)
 
         if obj.status != Run.Actions.PROGRESS:
-            return Response(
-                {'error': f'Cannot stop run from {obj.status} status'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({...}, status=400)
 
         obj.status = Run.Actions.FINISHED
 
-        # 1. Обновляем время
         RunTimeCalculator.update_run_time(obj)
 
-        # 2. Считаем статистику через сервис
-        RunStatsService().calculate(obj)
+        # ── Расчёт статистики прямо здесь ────────────────────────
+        last_pos = obj.positions.order_by('-date_time').first()
+        if last_pos and last_pos.distance:
+            obj.distance = Decimal(str(last_pos.distance)).quantize(Decimal('0.01'))
+        else:
+            obj.distance = Decimal('0.00')
 
-        obj.save(update_fields=[
-            'status',
-            'distance',
-            'speed',
-            'run_time_seconds'
-        ])
+        if obj.run_time_seconds > 0 and obj.distance > 0:
+            meters = obj.distance * Decimal(1000)
+            obj.speed = (meters / Decimal(obj.run_time_seconds)).quantize(
+                Decimal('0.01'), rounding=ROUND_HALF_UP
+            )
+        else:
+            obj.speed = Decimal('0.00')
+        # ───────────────────────────────────────────────────────────
+
+        obj.save(update_fields=['status', 'distance', 'speed', 'run_time_seconds'])
 
         ChallengeService(athlete=obj.athlete).apply_finished_run_challenges()
 
         serializer = RunSerializer(obj, context={'request': request})
         return Response(serializer.data)
-
-
 class AthleteInfoAPIView(views.APIView):
     """Для дополнительной информации от пользователя"""
 
