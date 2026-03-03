@@ -80,27 +80,14 @@ class StopFiAPIView(views.APIView):
 
         obj.status = Run.Actions.FINISHED
 
-        # 1. Обновляем время (как было)
         RunTimeCalculator.update_run_time(obj)
 
-        # 2. Дистанцию берём из уже поддерживаемого поля Run.distance
-        #    (оно должно быть актуальным благодаря PositionProcessor)
-        if obj.distance is None:
-            # аварийный fallback — на случай, если по какой-то причине не обновлялось
-            last_pos = obj.positions.order_by('-date_time').first()
-            if last_pos and last_pos.distance is not None:
-                obj.distance = Decimal(str(last_pos.distance)).quantize(Decimal('0.01'))
-            else:
-                obj.distance = Decimal('0.00')
-        # если distance уже есть — ничего не трогаем
+        # ── Используем сервис ───────────────────────────────────────
+        stats = RunStatsService.calculate_stats(obj)
 
-        # 3. Скорость
-        if obj.run_time_seconds and obj.run_time_seconds > 0 and obj.distance > 0:
-            meters = Decimal(str(obj.distance)) * Decimal('1000')
-            speed_ms = meters / Decimal(obj.run_time_seconds)
-            obj.speed = speed_ms.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        else:
-            obj.speed = Decimal('0.00')
+        obj.distance = stats['total_distance_km']
+        obj.speed   = stats['average_speed_ms']   # ← здесь будет 0.77, а не 0.97
+        # ─────────────────────────────────────────────────────────────
 
         obj.save(update_fields=['status', 'distance', 'speed', 'run_time_seconds'])
 
