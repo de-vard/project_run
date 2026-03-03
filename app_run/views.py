@@ -96,7 +96,7 @@ class StopFiAPIView(views.APIView):
 
         # 3. Скорость
         if obj.run_time_seconds and obj.run_time_seconds > 0 and obj.distance > 0:
-            meters = obj.distance * Decimal('1000')
+            meters = Decimal(str(obj.distance)) * Decimal('1000')
             speed_ms = meters / Decimal(obj.run_time_seconds)
             obj.speed = speed_ms.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         else:
