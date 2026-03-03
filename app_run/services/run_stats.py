@@ -15,17 +15,16 @@ class RunStatsService:
                 'average_speed_ms': Decimal('0.00'),
             }
 
-        # Общее расстояние — по-прежнему берём из последней позиции
+        # Общее расстояние — из последней позиции (это уже проверено, что считается верно)
         total_distance = positions.last().distance
 
-        # Время берём из уже рассчитанного поля
+        # Время — из поля модели (RunTimeCalculator должен быть верным)
         total_seconds = run.run_time_seconds or 0
 
-        # Считаем среднее арифметическое скоростей сегментов (как требует задание)
-        speeds = [p.speed for p in positions if p.speed > 0]  # исключаем первую позицию (speed=0)
-
-        if speeds:
-            avg_speed = sum(speeds) / Decimal(len(speeds))
+        # Классическая средняя скорость = дистанция / время
+        if total_seconds > 0:
+            meters = total_distance * Decimal('1000')
+            avg_speed = meters / Decimal(total_seconds)
             avg_speed = avg_speed.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         else:
             avg_speed = Decimal('0.00')
