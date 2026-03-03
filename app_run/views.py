@@ -76,34 +76,31 @@ class StopFiAPIView(views.APIView):
         obj = get_object_or_404(Run, id=run_id)
 
         if obj.status != Run.Actions.PROGRESS:
-            return Response({...}, status=400)
+            return Response({"error": f"Cannot stop run from {obj.status} status"}, status=400)
 
         obj.status = Run.Actions.FINISHED
 
+        # 1. Обновляем время (как было)
         RunTimeCalculator.update_run_time(obj)
 
-        # ── Расчёт статистики прямо здесь ────────────────────────
-        last_pos = obj.positions.order_by('-date_time').first()
-        print(f"Run {obj.id} FINISH DEBUG:")
-        print(f"  run_time_seconds   = {obj.run_time_seconds}")
-        print(f"  last distance      = {last_pos.distance if last_pos else 'нет позиций'}")
+        # 2. Дистанцию берём из уже поддерживаемого поля Run.distance
+        #    (оно должно быть актуальным благодаря PositionProcessor)
+        if obj.distance is None:
+            # аварийный fallback — на случай, если по какой-то причине не обновлялось
+            last_pos = obj.positions.order_by('-date_time').first()
+            if last_pos and last_pos.distance is not None:
+                obj.distance = Decimal(str(last_pos.distance)).quantize(Decimal('0.01'))
+            else:
+                obj.distance = Decimal('0.00')
+        # если distance уже есть — ничего не трогаем
 
-        if last_pos and last_pos.distance:
-            obj.distance = Decimal(str(last_pos.distance)).quantize(Decimal('0.01'))
-            print(f"  сумма всех distance в Position = {obj.distance}")
-        else:
-            obj.distance = Decimal('0.00')
-            print(f"  рассчитанная скорость = {obj.distance.quantize(Decimal('0.01'))} м/с")
-            print(f"  в км/ч                = {(obj.distance * Decimal('3.6')).quantize(Decimal('0.01'))}")
-
-        if obj.run_time_seconds > 0 and obj.distance > 0:
-            meters = obj.distance * Decimal(1000)
-            obj.speed = (meters / Decimal(obj.run_time_seconds)).quantize(
-                Decimal('0.01'), rounding=ROUND_HALF_UP
-            )
+        # 3. Скорость
+        if obj.run_time_seconds and obj.run_time_seconds > 0 and obj.distance > 0:
+            meters = obj.distance * Decimal('1000')
+            speed_ms = meters / Decimal(obj.run_time_seconds)
+            obj.speed = speed_ms.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         else:
             obj.speed = Decimal('0.00')
-        # ───────────────────────────────────────────────────────────
 
         obj.save(update_fields=['status', 'distance', 'speed', 'run_time_seconds'])
 
