@@ -23,13 +23,10 @@ class RunStatsService:
             if total_seconds > 0 else Decimal('0.00')
         )
 
-        speeds = [p.speed for p in positions if p.speed > 0]
-        if speeds:
-            avg_segment_speed = sum(speeds) / Decimal(len(speeds))
-        else:
-            avg_segment_speed = Decimal('0.00')
+        # speeds = [p.speed for p in positions if p.speed > 0]   # ← можно оставить для отладки или других метрик
+        # но для средней скорости забега НЕ используем
 
         return {
             'total_distance_km': total_distance.quantize(Decimal('0.01')),
-            'average_speed_ms': avg_segment_speed.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
+            'average_speed_ms': classic_speed.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP),
         }
