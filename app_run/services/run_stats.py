@@ -1,5 +1,5 @@
 # app_run/services/run_stats.py (пример, как это может выглядеть)
-from _pydecimal import Decimal
+from decimal import Decimal
 
 from app_run.models import Run
 
