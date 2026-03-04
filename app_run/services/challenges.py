@@ -26,11 +26,11 @@ class ChallengeService:
         if stats['total_sum'] and stats['total_sum'] > 50:
             Challenge.objects.get_or_create(
                 athlete=self.athlete,
-                full_name=self.full_name_50
+                full_name="50 км"
             )
 
         if stats['total_count'] >= 10:
             Challenge.objects.get_or_create(
                 athlete=self.athlete,
-                full_name=self.full_name_10
+                full_name="10 забегов"
             )
