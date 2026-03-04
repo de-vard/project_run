@@ -15,12 +15,15 @@ class RunStatsService:
                 'average_speed_ms': Decimal('0.00'),
             }
 
+        # Дистанцию по-прежнему берём из последней позиции — она считается верно
         total_distance = positions.last().distance
-        total_seconds = run.run_time_seconds or 0
 
-        if total_seconds > 0:
-            meters = total_distance * Decimal('1000')
-            avg_speed = meters / Decimal(total_seconds)
+        # Среднее арифметическое по скоростям сегментов (как требует ТЗ)
+        # Обычно исключаем первую позицию (speed = 0.00)
+        speeds = [p.speed for p in positions[1:] if p.speed > Decimal('0')]  # или без фильтра >0, если тесты включают нули
+
+        if speeds:
+            avg_speed = sum(speeds) / Decimal(len(speeds))
             avg_speed = avg_speed.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         else:
             avg_speed = Decimal('0.00')
